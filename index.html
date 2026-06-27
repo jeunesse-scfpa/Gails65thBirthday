@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0d0b0a">
+  <meta name="description" content="You're invited to celebrate Gail's 65th Birthday — Thursday, August 13 at 5:00 PM">
+  <title>Gail's 65th Birthday Celebration</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ╔══════════════════════════════════════════════════╗
+       ║   BACKGROUND — animated gold particle canvas    ║
+       ╚══════════════════════════════════════════════════╝ -->
+  <canvas id="particles" aria-hidden="true"></canvas>
+
+  <!-- ╔══════════════════════════════════════════════════╗
+       ║   SCENE 1 — Envelope landing                    ║
+       ╚══════════════════════════════════════════════════╝ -->
+  <main id="scene-landing" class="scene scene--active" aria-label="Invitation envelope">
+
+    <div class="envelope-stage" id="envelopeStage">
+
+      <!-- Address card above envelope -->
+      <div class="envelope-address" id="envelopeAddress" aria-live="polite">
+        <span class="address-to">To:</span>
+        <span class="address-name" id="guestName">Valued Guest</span>
+        <span class="address-subtitle">A Special Invitation</span>
+      </div>
+
+      <!-- The envelope itself is the tappable element -->
+      <div
+        class="envelope"
+        id="envelope"
+        role="button"
+        tabindex="0"
+        aria-label="Tap to open your invitation"
+        onclick="window.invitation.openEnvelope()"
+        onkeydown="window.invitation.handleKey(event)"
+      >
+        <!-- Z1: envelope body background -->
+        <div class="env-body" aria-hidden="true">
+          <div class="env-body__texture" aria-hidden="true"></div>
+          <div class="env-body__border" aria-hidden="true"></div>
+          <!-- decorative V-fold lines on front -->
+          <div class="env-body__folds" aria-hidden="true"></div>
+        </div>
+
+        <!-- Z2: invitation card (hidden inside, will rise up) -->
+        <div class="env-card" id="envCard" aria-hidden="true">
+          <div class="env-card__inner"></div>
+        </div>
+
+        <!-- Z3: envelope flap (triangle lid, opens backward) -->
+        <div class="env-flap" id="envFlap" aria-hidden="true">
+          <div class="env-flap__face"></div>
+          <div class="env-flap__shadow" aria-hidden="true"></div>
+        </div>
+
+        <!-- Z4: wax seal -->
+        <div class="wax-seal" id="waxSeal" aria-hidden="true">
+          <div class="wax-seal__disc">
+            <span class="wax-seal__letter">G</span>
+          </div>
+        </div>
+
+        <!-- Z5: tap cue -->
+        <div class="tap-cue" id="tapCue" aria-hidden="true">
+          <span class="tap-cue__text">Tap to Open</span>
+          <span class="tap-cue__dot"></span>
+        </div>
+
+      </div><!-- /.envelope -->
+
+    </div><!-- /.envelope-stage -->
+
+    <!-- Quote that appears mid-animation -->
+    <div class="quote-veil" id="quoteVeil" role="dialog" aria-modal="false" aria-hidden="true" aria-label="Opening quote">
+      <blockquote class="quote-veil__text">
+        <p>"Life isn't measured by the years we live,</p>
+        <p>but by the moments we share together."</p>
+      </blockquote>
+    </div>
+
+  </main><!-- /#scene-landing -->
+
+
+  <!-- ╔══════════════════════════════════════════════════╗
+       ║   SCENE 2 — Main invitation                     ║
+       ╚══════════════════════════════════════════════════╝ -->
+  <section id="scene-invitation" class="scene" aria-label="Birthday invitation details">
+    <div class="inv">
+
+      <!-- ── Portrait + Title ──────────────────────────── -->
+      <header class="inv__header reveal">
+
+        <div class="portrait" aria-label="Portrait of Gail">
+          <!--
+            Replace src with Gail's actual photo, e.g. src="assets/gail.jpg"
+            Supported formats: jpg, png, webp.
+            The onerror attribute shows the gold monogram fallback if the image is missing.
+            Portrait placeholder SVG is at assets/portrait.svg for design reference.
+          -->
+          <img
+            src="assets/portrait.jpg"
+            alt="Gail"
+            class="portrait__img"
+            loading="lazy"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+          >
+          <div class="portrait__mono" aria-hidden="true"><span>G</span></div>
+          <div class="portrait__ring portrait__ring--1" aria-hidden="true"></div>
+          <div class="portrait__ring portrait__ring--2" aria-hidden="true"></div>
+        </div>
+
+        <p class="inv__eyebrow">Celebrating</p>
+        <h1 class="inv__name">Gail's</h1>
+        <h2 class="inv__milestone">65<sup>th</sup> Birthday</h2>
+        <div class="divider" aria-hidden="true">
+          <span class="divider__line"></span>
+          <span class="divider__gem">◆</span>
+          <span class="divider__line"></span>
+        </div>
+
+      </header>
+
+      <!-- ── Event details ─────────────────────────────── -->
+      <article class="inv__details reveal" aria-label="Event date and location">
+
+        <div class="detail-block">
+          <p class="detail-block__day">Thursday</p>
+          <p class="detail-block__date">August 13</p>
+          <p class="detail-block__time">Beginning at 5:00 PM</p>
+        </div>
+
+        <div class="divider divider--sm" aria-hidden="true">
+          <span class="divider__line"></span>
+          <span class="divider__gem">◆</span>
+          <span class="divider__line"></span>
+        </div>
+
+        <div class="detail-block">
+          <p class="detail-block__eyebrow">Join us at</p>
+          <p class="detail-block__venue">Villagio Condos</p>
+          <address class="detail-block__address">103A–310 Wellman Crescent</address>
+        </div>
+
+      </article>
+
+      <!-- ── Schedule ──────────────────────────────────── -->
+      <section class="inv__schedule reveal" aria-label="Evening schedule">
+
+        <h3 class="schedule-heading">Evening Schedule</h3>
+
+        <ol class="schedule-list" role="list">
+
+          <li class="schedule-item">
+            <div class="schedule-item__time">5:00 – 8:00 PM</div>
+            <div class="schedule-item__body">
+              <p>Join us for delicious food, laughter, and refreshments.</p>
+              <p class="schedule-item__note">Beer, wine coolers, and dinner will be provided.</p>
+            </div>
+          </li>
+
+          <li class="schedule-item">
+            <div class="schedule-item__time">8:00 PM</div>
+            <div class="schedule-item__body">
+              <p>Transportation provided to continue the celebration at</p>
+              <p class="schedule-item__venue">Vic Lam Cavern</p>
+              <p class="schedule-item__venue-sub">Clavet Motor Inn</p>
+              <p class="schedule-item__note">Celebrate with music, drinks, and great company.</p>
+            </div>
+          </li>
+
+          <li class="schedule-item schedule-item--last">
+            <div class="schedule-item__time">12:00 AM</div>
+            <div class="schedule-item__body">
+              <p>Transportation back to Gail's residence will be provided.</p>
+            </div>
+          </li>
+
+        </ol>
+
+      </section>
+
+      <!-- ── RSVP ──────────────────────────────────────── -->
+      <section class="inv__rsvp reveal" aria-label="RSVP information">
+        <p class="inv__rsvp-label">Please RSVP by July 31</p>
+        <p class="inv__rsvp-contact">Call Gail</p>
+        <a href="tel:3062202181" class="inv__rsvp-phone" aria-label="Call Gail at 306-220-2181">
+          306-220-2181
+        </a>
+      </section>
+
+      <!-- ── No gifts ──────────────────────────────────── -->
+      <div class="inv__no-gifts reveal">
+        <p class="inv__no-gifts-primary">No gifts, please.</p>
+        <p class="inv__no-gifts-secondary">Your presence is the greatest gift of all.</p>
+      </div>
+
+      <!-- ── Action buttons ─────────────────────────────── -->
+      <nav class="inv__actions reveal" aria-label="Quick actions">
+
+        <a href="tel:3062202181"
+           class="btn btn--gold"
+           aria-label="Call Gail at 306-220-2181">
+          <svg class="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8a19.79 19.79 0 01-3.07-8.68A2 2 0 012 0h3a2 2 0 012 1.72 12.8 12.8 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.8 12.8 0 002.81.7A2 2 0 0122 14.92v2z"/>
+          </svg>
+          Call Gail
+        </a>
+
+        <a href="https://www.google.com/maps/dir/?api=1&destination=310+Wellman+Crescent+Clavet+SK"
+           class="btn btn--outline"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Get directions to Villagio Condos, 310 Wellman Crescent">
+          <svg class="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          Get Directions
+        </a>
+
+        <button class="btn btn--outline"
+                onclick="window.invitation.addToCalendar()"
+                aria-label="Add this celebration to your calendar">
+          <svg class="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          Add to Calendar
+        </button>
+
+      </nav>
+
+      <!-- ── Footer ─────────────────────────────────────── -->
+      <footer class="inv__footer reveal">
+        <div class="divider" aria-hidden="true">
+          <span class="divider__line"></span>
+          <span class="divider__gem">◆</span>
+          <span class="divider__line"></span>
+        </div>
+        <p class="inv__footer-text">We can't wait to celebrate with you.</p>
+      </footer>
+
+    </div><!-- /.inv -->
+  </section><!-- /#scene-invitation -->
+
+  <script src="script.js"></script>
+</body>
+</html>
