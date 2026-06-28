@@ -4,16 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#0d0b0a">
-  <meta name="description" content="You're invited to celebrate Gail's 65th Birthday â Thursday, August 13 at 5:00 PM">
+  <meta name="description" content="You're invited to celebrate Gail's 65th Birthday Ã¢ÂÂ Thursday, August 13 at 5:00 PM">
   <title>Gail's 65th Birthday Celebration</title>
 
   <!-- Favicon: wax seal "G" -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%237a0e1e'/%3E%3Ccircle cx='16' cy='16' r='12' fill='none' stroke='%23f5ddb5' stroke-width='0.8' opacity='0.5'/%3E%3Ctext x='16' y='22' font-family='Georgia%2Cserif' font-size='17' font-weight='600' font-style='italic' fill='%23f5ddb5' text-anchor='middle'%3EG%3C/text%3E%3C/svg%3E">
 
-  <!-- Open Graph â makes the link look beautiful when shared via text/social -->
+  <!-- Open Graph Ã¢ÂÂ makes the link look beautiful when shared via text/social -->
   <meta property="og:type"        content="website">
-  <meta property="og:title"       content="You're Invited â Gail's 65th Birthday">
-  <meta property="og:description" content="Join us Thursday, August 13 at 5:00 PM Â· Villagio Condos Â· An evening of food, laughter & celebration.">
+  <meta property="og:title"       content="You're Invited Ã¢ÂÂ Gail's 65th Birthday">
+  <meta property="og:description" content="Join us Thursday, August 13 at 5:00 PM ÃÂ· Villagio Condos ÃÂ· An evening of food, laughter & celebration.">
   <meta property="og:image"       content="assets/portrait.jpg">
   <meta property="og:url"         content="https://jeunesse-scfpa.github.io/gails-65th-birthday/">
   <meta name="twitter:card"       content="summary_large_image">
@@ -23,7 +23,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 
-  <!-- Confetti library (loaded async â only used at reveal moment) -->
+  <!-- Confetti library (loaded async Ã¢ÂÂ only used at reveal moment) -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1/dist/confetti.browser.min.js" defer></script>
 
   <link rel="stylesheet" href="styles.css">
@@ -35,13 +35,13 @@
 
   <!-- Music toggle (always visible, top-right corner) -->
   <button class="music-toggle" id="musicToggle" aria-label="Toggle background music" title="Toggle music">
-    <span class="music-toggle__icon" id="musicIcon" aria-hidden="true">âª</span>
+    <span class="music-toggle__icon" id="musicIcon" aria-hidden="true">Ã¢ÂÂª</span>
   </button>
 
 
-  <!-- ââââââââââââââââââââââââââââââââââââââââââââââââââââ
-       â   SCENE 1 â Envelope                           â
-       ââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <!-- Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+       Ã¢ÂÂ   SCENE 1 Ã¢ÂÂ Envelope                           Ã¢ÂÂ
+       Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ -->
   <main id="scene-landing" class="scene scene--active" aria-label="Invitation envelope">
 
     <div class="envelope-stage" id="envelopeStage">
@@ -94,9 +94,9 @@
   </main>
 
 
-  <!-- ââââââââââââââââââââââââââââââââââââââââââââââââââââ
-       â   SCENE 2 â Invitation                         â
-       ââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <!-- Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+       Ã¢ÂÂ   SCENE 2 Ã¢ÂÂ Invitation                         Ã¢ÂÂ
+       Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ -->
   <section id="scene-invitation" class="scene" aria-label="Birthday invitation details">
     <div class="inv">
 
@@ -126,7 +126,7 @@
         <h2 class="inv__milestone">65<sup>th</sup> Birthday</h2>
         <div class="divider" aria-hidden="true">
           <span class="divider__line"></span>
-          <span class="divider__gem">â</span>
+          <span class="divider__gem">Ã¢ÂÂ</span>
           <span class="divider__line"></span>
         </div>
 
@@ -164,14 +164,14 @@
 
         <div class="divider divider--sm" aria-hidden="true">
           <span class="divider__line"></span>
-          <span class="divider__gem">â</span>
+          <span class="divider__gem">Ã¢ÂÂ</span>
           <span class="divider__line"></span>
         </div>
 
         <div class="detail-block">
           <p class="detail-block__eyebrow">Join us at</p>
           <p class="detail-block__venue">Villagio Condos</p>
-          <address class="detail-block__address">103Aâ310 Wellman Crescent</address>
+          <address class="detail-block__address">103AÃ¢ÂÂ310 Wellman Crescent</address>
         </div>
 
       </article>
@@ -181,7 +181,7 @@
         <h3 class="schedule-heading">Evening Schedule</h3>
         <ol class="schedule-list" role="list">
           <li class="schedule-item">
-            <div class="schedule-item__time">5:00 â 8:00 PM</div>
+            <div class="schedule-item__time">5:00 Ã¢ÂÂ 8:00 PM</div>
             <div class="schedule-item__body">
               <p>Join us for delicious food, laughter, and refreshments.</p>
               <p class="schedule-item__note">Beer, wine coolers, and dinner will be provided.</p>
@@ -221,7 +221,7 @@
       </div>
 
       <!-- Photo gallery
-           Drop photos named photo1.jpg â photo6.jpg into assets/gallery/
+           Drop photos named photo1.jpg Ã¢ÂÂ photo6.jpg into assets/gallery/
            The gallery hides itself automatically if no photos are found. -->
       <section class="inv__gallery reveal" id="gallery" aria-label="Photo gallery" hidden>
         <h3 class="gallery-heading">
@@ -274,7 +274,7 @@
       <footer class="inv__footer reveal">
         <div class="divider" aria-hidden="true">
           <span class="divider__line"></span>
-          <span class="divider__gem">â</span>
+          <span class="divider__gem">Ã¢ÂÂ</span>
           <span class="divider__line"></span>
         </div>
         <p class="inv__footer-text">We can't wait to celebrate with you.</p>
@@ -284,23 +284,23 @@
   </section>
 
 
-  <!-- ââââââââââââââââââââââââââââââââââââââââââââââââââââ
-       â   RSVP MODAL                                   â
-       ââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <!-- Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+       Ã¢ÂÂ   RSVP MODAL                                   Ã¢ÂÂ
+       Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ -->
   <div class="rsvp-modal" id="rsvpModal" role="dialog" aria-modal="true" aria-label="RSVP form" aria-hidden="true">
     <div class="rsvp-modal__backdrop" onclick="window.invitation.closeRSVP()"></div>
     <div class="rsvp-modal__card">
 
-      <button class="rsvp-modal__close" onclick="window.invitation.closeRSVP()" aria-label="Close RSVP form">â</button>
+      <button class="rsvp-modal__close" onclick="window.invitation.closeRSVP()" aria-label="Close RSVP form">Ã¢ÂÂ</button>
 
       <div class="divider divider--sm" aria-hidden="true">
         <span class="divider__line"></span>
-        <span class="divider__gem">â</span>
+        <span class="divider__gem">Ã¢ÂÂ</span>
         <span class="divider__line"></span>
       </div>
 
       <h2 class="rsvp-modal__title">Will you join us?</h2>
-      <p class="rsvp-modal__sub">Gail's 65th Birthday Â· August 13</p>
+      <p class="rsvp-modal__sub">Gail's 65th Birthday ÃÂ· August 13</p>
 
       <form class="rsvp-form" id="rsvpForm" novalidate>
 
@@ -326,7 +326,7 @@
 
         <div class="rsvp-form__field">
           <label class="rsvp-form__label" for="rsvp-msg">Message for Gail <span class="rsvp-form__optional">(optional)</span></label>
-          <textarea class="rsvp-form__input rsvp-form__textarea" id="rsvp-msg" placeholder="A kind word or memoryâ¦" rows="3"></textarea>
+          <textarea class="rsvp-form__input rsvp-form__textarea" id="rsvp-msg" placeholder="A kind word or memoryÃ¢ÂÂ¦" rows="3"></textarea>
         </div>
 
         <button type="submit" class="btn btn--gold rsvp-form__submit" style="width:100%">
@@ -342,7 +342,7 @@
 
   <!-- Gallery lightbox -->
   <div class="gallery-lightbox" id="galleryLightbox" role="dialog" aria-modal="true" aria-label="Photo enlarged" aria-hidden="true">
-    <button class="gallery-lightbox__close" id="galleryLbClose" aria-label="Close photo">â</button>
+    <button class="gallery-lightbox__close" id="galleryLbClose" aria-label="Close photo">Ã¢ÂÂ</button>
     <img class="gallery-lightbox__img" id="galleryLbImg" src="" alt="Gallery photo enlarged">
   </div>
 
@@ -352,6 +352,6 @@
   </div>
   <script src="https://www.youtube.com/iframe_api"></script>
 
-  <script src="script.js?v=4"></script>
+  <script src="script.js?v=5"></script>
 </body>
 </html>
