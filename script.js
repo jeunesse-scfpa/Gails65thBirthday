@@ -466,7 +466,7 @@ function handleRSVPSubmit(e) {
     card.innerHTML = `
       <div style="text-align:center;padding:2rem 1rem">
         <p style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-style:italic;color:#221c16;margin-bottom:.5rem">
-          ${attending === 'No' ? 'We'll miss you!' : 'We can't wait to celebrate!'}
+          ${attending === 'No' ? "We'll miss you!" : "We can't wait to celebrate!"}
         </p>
         <p style="font-family:'Lato',sans-serif;font-size:.82rem;letter-spacing:.1em;color:#7a6a58;margin-bottom:1.5rem">
           ${attending === 'No' ? 'Thank you for letting us know.' : 'See you on August 13th.'}
