@@ -1,578 +1,531 @@
 /* ============================================================
-   GAIL'S 65TH BIRTHDAY INVITATION — script.js
-   ============================================================
-
-   Architecture: all public methods live on window.invitation
-   so the HTML onclick attributes stay tidy and future features
-   can be added without touching existing code.
-
-   Sections:
-     1. Configuration
-     2. Initialization
-     3. Particle system
-     4. Envelope animation sequence
-     5. Scene transition
-     6. Scroll-reveal (IntersectionObserver)
-     7. Add to Calendar (ICS generator)
-     8. Guest personalization (URL param)
-     9. Future expansion stubs
+   GAIL'S 65TH BIRTHDAY INVITATION — script.js  v2
    ============================================================ */
 
 'use strict';
 
-/* ════════════════════════════════════════════════════════════
-   1. CONFIGURATION
-   Edit these values to personalize the invitation.
-   ════════════════════════════════════════════════════════════ */
+/* ──────────────────────────────────────────────────────────────
+   CONFIG
+   ────────────────────────────────────────────────────────────── */
 const CONFIG = {
-  // Guest name shown on the envelope.
-  // Override per-guest via URL: ?guest=Sarah+Smith
-  defaultGuestName: 'Valued Guest',
-
-  // Event details for the ICS calendar file
-  event: {
-    title:       "Gail's 65th Birthday Celebration",
-    // Local Saskatchewan time (America/Regina, UTC−6, no DST)
-    startLocal:  '20260813T170000',   // Aug 13 2026 5:00 PM
-    endLocal:    '20260814T000000',   // Aug 14 2026 12:00 AM
-    timezone:    'America/Regina',
-    location:    '103A–310 Wellman Crescent, Clavet, SK',
-    description: [
-      'Join us for an evening of food, laughter and refreshments.',
-      'Beer, wine coolers, and dinner provided.',
-      '8:00 PM: Transportation to Vic Lam Cavern, Clavet Motor Inn.',
-      'Celebrate with music, drinks, and great company until midnight.',
-      '12:00 AM: Return transportation to Gail\'s residence provided.',
-      'Please RSVP by July 31 — Call Gail: 306-220-2181.',
-      'No gifts please. Your presence is the greatest gift of all.',
-    ].join('\\n'),
-  },
-
-  // Animation timing (milliseconds) — tweak to taste
-  timing: {
-    sealBreakDelay:  0,      // time after tap before seal breaks
-    flapOpenDelay:   360,    // after seal break starts
-    cardRiseDelay:   700,    // after flap starts opening
-    quoteShowDelay:  1100,   // after card starts rising (~halfway up)
-    quoteDuration:   2800,   // how long quote stays fully visible
-    quoteFadeOut:    900,    // fade-out duration
-    sceneTransition: 700,    // pause after quote before scene switch
-  },
+  eventDate: new Date('2025-08-13T17:00:00'),
+  rsvpDate:  'July 31',
+  phone:     '3062202181',
+  phoneDisplay: '306-220-2181',
+  galleryPhotos: [
+    'assets/gallery/photo1.jpg',
+    'assets/gallery/photo2.jpg',
+    'assets/gallery/photo3.jpg',
+    'assets/gallery/photo4.jpg',
+    'assets/gallery/photo5.jpg',
+    'assets/gallery/photo6.jpg',
+  ],
+  quoteDelay:    2200,
+  quoteDuration: 3200,
+  confettiDelay:  400,
 };
 
 
-/* ════════════════════════════════════════════════════════════
-   2. INITIALIZATION
-   ════════════════════════════════════════════════════════════ */
-window.invitation = {};
+/* ──────────────────────────────────────────────────────────────
+   PARTICLES
+   ────────────────────────────────────────────────────────────── */
+let particleCtx, particleAnimId;
+const motes = [];
 
-document.addEventListener('DOMContentLoaded', () => {
-  // Apply guest name from URL or default
-  applyGuestName();
-
-  // Gold particle background
-  initParticles();
-
-  // Wire scroll-reveal for the invitation scene
-  initScrollReveal();
-
-  // Expose public API
-  window.invitation.openEnvelope  = openEnvelope;
-  window.invitation.handleKey     = handleEnvelopeKey;
-  window.invitation.addToCalendar = addToCalendar;
-});
-
-
-/* ════════════════════════════════════════════════════════════
-   3. PARTICLE SYSTEM
-   Tiny gold motes drift gently upward against the dark bg.
-   Canvas is killed when the invitation scene opens.
-   ════════════════════════════════════════════════════════════ */
 function initParticles() {
   const canvas = document.getElementById('particles');
   if (!canvas) return;
+  particleCtx = canvas.getContext('2d');
+  resizeCanvas();
+  for (let i = 0; i < 55; i++) spawnMote(true);
+  animateParticles();
+  window.addEventListener('resize', resizeCanvas);
+}
 
-  // Honour prefers-reduced-motion
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    canvas.style.display = 'none';
-    return;
+function resizeCanvas() {
+  const c = document.getElementById('particles');
+  if (!c) return;
+  c.width  = window.innerWidth;
+  c.height = window.innerHeight;
+}
+
+function spawnMote(scatter) {
+  motes.push({
+    x:  scatter ? Math.random() * window.innerWidth  : Math.random() * window.innerWidth,
+    y:  scatter ? Math.random() * window.innerHeight : window.innerHeight + 8,
+    r:  Math.random() * 1.8 + .4,
+    vy: -(Math.random() * .55 + .2),
+    vx: (Math.random() - .5) * .25,
+    alpha: Math.random() * .45 + .1,
+    twinkleSpeed:  Math.random() * .018 + .006,
+    twinkleOffset: Math.random() * Math.PI * 2,
+    gold: Math.random() > .35,
+  });
+}
+
+function animateParticles() {
+  if (!particleCtx) return;
+  const w = particleCtx.canvas.width, h = particleCtx.canvas.height;
+  particleCtx.clearRect(0, 0, w, h);
+  const t = performance.now() / 1000;
+  for (let i = motes.length - 1; i >= 0; i--) {
+    const m = motes[i];
+    m.x += m.vx; m.y += m.vy;
+    const alpha = m.alpha * (.6 + .4 * Math.sin(t * m.twinkleSpeed * 60 + m.twinkleOffset));
+    particleCtx.beginPath();
+    particleCtx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
+    particleCtx.fillStyle = m.gold
+      ? `rgba(201,168,76,${alpha})`
+      : `rgba(240,223,160,${alpha * .7})`;
+    particleCtx.fill();
+    if (m.y < -10) { motes.splice(i, 1); spawnMote(false); }
   }
+  particleAnimId = requestAnimationFrame(animateParticles);
+}
 
-  const ctx = canvas.getContext('2d');
-  let raf;
-  let pool = [];
-
-  const COUNT = window.innerWidth < 480 ? 45 : 70;
-
-  // ── Resize ──────────────────────────────────────────────
-  function resize() {
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  window.addEventListener('resize', resize, { passive: true });
-  resize();
-
-  // ── Particle factory ────────────────────────────────────
-  function makeParticle(randomY = false) {
-    const maxLife = 220 + Math.random() * 280;
-    return {
-      x:        Math.random() * canvas.width,
-      y:        randomY ? Math.random() * canvas.height : canvas.height + 12,
-      size:     Math.random() * 1.8 + 0.4,
-      vx:       (Math.random() - 0.5) * 0.18,
-      vy:       -(Math.random() * 0.35 + 0.12),
-      alpha:    0,
-      maxAlpha: Math.random() * 0.45 + 0.12,
-      life:     randomY ? Math.random() * maxLife : 0,
-      maxLife,
-    };
-  }
-
-  // Seed initial pool with random vertical positions
-  for (let i = 0; i < COUNT; i++) pool.push(makeParticle(true));
-
-  // ── Draw loop ───────────────────────────────────────────
-  function tick() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    pool.forEach((p, i) => {
-      // Move
-      p.x  += p.vx + Math.sin(p.life * 0.03) * 0.06;
-      p.y  += p.vy;
-      p.life++;
-
-      // Gentle wander
-      p.vx += (Math.random() - 0.5) * 0.008;
-      p.vx  = Math.max(-0.28, Math.min(0.28, p.vx));
-
-      // Fade in / out
-      const fadeFrames = 55;
-      if (p.life < fadeFrames) {
-        p.alpha = (p.life / fadeFrames) * p.maxAlpha;
-      } else if (p.life > p.maxLife - fadeFrames) {
-        p.alpha = ((p.maxLife - p.life) / fadeFrames) * p.maxAlpha;
-      } else {
-        p.alpha = p.maxAlpha;
-      }
-
-      // Recycle
-      if (p.life >= p.maxLife || p.y < -20) {
-        pool[i] = makeParticle(false);
-        return;
-      }
-
-      // Draw: soft gold dot + cross sparkle on larger ones
-      ctx.save();
-      ctx.globalAlpha = p.alpha;
-
-      const hue = 40 + Math.floor(Math.random() * 10);
-      ctx.fillStyle = `hsl(${hue}, 62%, 64%)`;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fill();
-
-      if (p.size > 1.3) {
-        ctx.strokeStyle = `hsla(${hue}, 80%, 82%, 0.45)`;
-        ctx.lineWidth = 0.5;
-        const arm = p.size * 2.2;
-        ctx.beginPath();
-        ctx.moveTo(p.x - arm, p.y); ctx.lineTo(p.x + arm, p.y);
-        ctx.moveTo(p.x, p.y - arm); ctx.lineTo(p.x, p.y + arm);
-        ctx.stroke();
-      }
-
-      ctx.restore();
-    });
-
-    raf = requestAnimationFrame(tick);
-  }
-
-  tick();
-
-  // Expose stop function so the scene-transition can kill the canvas
-  window.invitation._stopParticles = () => {
-    cancelAnimationFrame(raf);
-    // Brief fade-out, then hide
-    canvas.style.transition = 'opacity 1.8s ease';
-    canvas.style.opacity = '0';
-    setTimeout(() => (canvas.style.display = 'none'), 1900);
-  };
+function killParticles() {
+  cancelAnimationFrame(particleAnimId);
+  const c = document.getElementById('particles');
+  if (c && particleCtx) particleCtx.clearRect(0, 0, c.width, c.height);
 }
 
 
-/* ════════════════════════════════════════════════════════════
-   4. ENVELOPE ANIMATION SEQUENCE
-   ════════════════════════════════════════════════════════════ */
-let _envelopeOpened = false;
+/* ──────────────────────────────────────────────────────────────
+   WEB AUDIO — paper rustle
+   ────────────────────────────────────────────────────────────── */
+let audioCtx;
 
-function handleEnvelopeKey(e) {
-  if (e.key === 'Enter' || e.key === ' ') {
-    e.preventDefault();
-    openEnvelope();
+function ensureAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function playPaperRustle() {
+  try {
+    ensureAudioCtx();
+    const duration = 1.2;
+    const bufLen = audioCtx.sampleRate * duration;
+    const buf = audioCtx.createBuffer(1, bufLen, audioCtx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < bufLen; i++) data[i] = (Math.random() * 2 - 1);
+
+    const src  = audioCtx.createBufferSource();
+    src.buffer = buf;
+    const bp   = audioCtx.createBiquadFilter();
+    bp.type = 'bandpass'; bp.frequency.value = 3400; bp.Q.value = .7;
+    const gain = audioCtx.createGain();
+    gain.gain.setValueAtTime(0, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(.22, audioCtx.currentTime + .08);
+    gain.gain.exponentialRampToValueAtTime(.001, audioCtx.currentTime + duration);
+
+    src.connect(bp); bp.connect(gain); gain.connect(audioCtx.destination);
+    src.start(); src.stop(audioCtx.currentTime + duration);
+  } catch (e) { /* silently skip */ }
+}
+
+
+/* ──────────────────────────────────────────────────────────────
+   WEB AUDIO — ambient music toggle
+   ────────────────────────────────────────────────────────────── */
+let musicNodes = null;
+let musicPlaying = false;
+
+function initMusic() {
+  const btn = document.getElementById('musicToggle');
+  if (btn) btn.addEventListener('click', toggleMusic);
+}
+
+function buildMusicNodes() {
+  ensureAudioCtx();
+  const master = audioCtx.createGain();
+  master.gain.value = 0;
+  master.connect(audioCtx.destination);
+
+  // Soft pad chord (Ab major voicing)
+  const freqs = [207.65, 261.63, 311.13, 415.30, 523.25];
+  freqs.forEach(f => {
+    const o = audioCtx.createOscillator();
+    o.type = 'sine';
+    o.frequency.value = f + (Math.random() - .5) * .6;
+    const g = audioCtx.createGain();
+    g.gain.value = .055 / freqs.length;
+    o.connect(g); g.connect(master);
+    o.start();
+  });
+
+  // Quiet breath layer
+  const bufLen = audioCtx.sampleRate * 4;
+  const noiseBuf = audioCtx.createBuffer(1, bufLen, audioCtx.sampleRate);
+  const nd = noiseBuf.getChannelData(0);
+  for (let i = 0; i < bufLen; i++) nd[i] = (Math.random() * 2 - 1) * .012;
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = noiseBuf; noise.loop = true;
+  const nLp = audioCtx.createBiquadFilter();
+  nLp.type = 'lowpass'; nLp.frequency.value = 320;
+  noise.connect(nLp); nLp.connect(master);
+  noise.start();
+
+  musicNodes = { master };
+}
+
+function toggleMusic() {
+  ensureAudioCtx();
+  const btn  = document.getElementById('musicToggle');
+  const icon = document.getElementById('musicIcon');
+  if (!musicNodes) buildMusicNodes();
+
+  if (musicPlaying) {
+    musicNodes.master.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1.5);
+    musicPlaying = false;
+    if (btn)  btn.classList.remove('is-playing');
+    if (icon) icon.textContent = '♪';
+  } else {
+    musicNodes.master.gain.linearRampToValueAtTime(.9, audioCtx.currentTime + 2);
+    musicPlaying = true;
+    if (btn)  btn.classList.add('is-playing');
+    if (icon) icon.textContent = '♫';
   }
+}
+
+
+/* ──────────────────────────────────────────────────────────────
+   CONFETTI
+   ────────────────────────────────────────────────────────────── */
+function fireConfetti() {
+  if (typeof confetti !== 'function') return;
+  const gold = ['#c9a84c','#dfc070','#f0dfa0','#b8922e','#faf6ef'];
+  const origin = { y: .65 };
+  confetti({ particleCount:55, spread:55, startVelocity:38, colors:gold, origin:{ x:.25, ...origin } });
+  setTimeout(() => confetti({ particleCount:55, spread:55, startVelocity:38, colors:gold, origin:{ x:.75, ...origin } }), 220);
+  setTimeout(() => confetti({ particleCount:30, spread:75, startVelocity:28, colors:gold, scalar:.75, origin:{ x:.5, ...origin } }), 480);
+}
+
+
+/* ──────────────────────────────────────────────────────────────
+   ENVELOPE ANIMATION
+   ────────────────────────────────────────────────────────────── */
+let envelopeOpened = false;
+
+function initEnvelope() {
+  const env = document.querySelector('.envelope');
+  if (!env) return;
+  env.addEventListener('click', openEnvelope);
+  env.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') openEnvelope(); });
+  env.setAttribute('role','button');
+  env.setAttribute('tabindex','0');
 }
 
 async function openEnvelope() {
-  if (_envelopeOpened) return;
-  _envelopeOpened = true;
+  if (envelopeOpened) return;
+  envelopeOpened = true;
 
-  const T        = CONFIG.timing;
-  const envelope = document.getElementById('envelope');
-  const seal     = document.getElementById('waxSeal');
-  const flap     = document.getElementById('envFlap');
-  const card     = document.getElementById('envCard');
-  const tapCue   = document.getElementById('tapCue');
-  const quote    = document.getElementById('quoteVeil');
+  const seal   = document.querySelector('.wax-seal');
+  const flap   = document.querySelector('.env-flap');
+  const card   = document.querySelector('.env-card');
+  const veil   = document.querySelector('.quote-veil');
+  const tapCue = document.querySelector('.tap-cue');
 
-  // ── Lock envelope interactions ──────────────────────────
-  envelope.classList.add('is-opening');
-  envelope.removeAttribute('role');
-  envelope.removeAttribute('tabindex');
-  envelope.style.cursor = 'default';
+  if (tapCue) tapCue.style.opacity = '0';
+  document.querySelector('.envelope')?.classList.add('is-opening');
 
-  // Hide tap cue
-  if (tapCue) {
-    tapCue.style.transition = 'opacity .3s ease';
-    tapCue.style.opacity = '0';
+  playPaperRustle();
+
+  seal?.classList.add('is-breaking');
+  await delay(500);
+
+  playPaperRustle();
+  flap?.classList.add('is-open');
+  await delay(700);
+
+  card?.classList.add('is-rising');
+  await delay(1800);
+
+  if (veil) {
+    veil.classList.add('is-visible');
+    await delay(CONFIG.quoteDuration);
+    veil.classList.remove('is-visible');
+    await delay(900);
   }
 
-  // ── Step 1: Seal breaks ──────────────────────────────────
-  await delay(T.sealBreakDelay);
-  seal.classList.add('is-breaking');
-
-  // ── Step 2: Flap swings open ─────────────────────────────
-  await delay(T.flapOpenDelay);
-  flap.classList.add('is-open');
-
-  // Allow card to overflow the envelope once flap is rotating
-  // (envelope has overflow visible after a short grace period)
-  setTimeout(() => {
-    envelope.style.overflow = 'visible';
-  }, 400);
-
-  // ── Step 3: Card rises ───────────────────────────────────
-  await delay(T.cardRiseDelay);
-  card.classList.add('is-rising');
-
-  // ── Step 4: Quote fades in at ~halfway point ─────────────
-  await delay(T.quoteShowDelay);
-  showQuote(quote);
-
-  // ── Step 5: Quote fades out ──────────────────────────────
-  await delay(T.quoteDuration);
-  hideQuote(quote);
-
-  // ── Step 6: Transition to invitation ─────────────────────
-  await delay(T.quoteFadeOut + T.sceneTransition);
   transitionToInvitation();
 }
 
-function showQuote(el) {
-  el.removeAttribute('aria-hidden');
-  el.classList.add('is-visible');
-}
-
-function hideQuote(el) {
-  el.style.transition = 'opacity .9s ease';
-  el.style.opacity = '0';
-  setTimeout(() => {
-    el.setAttribute('aria-hidden', 'true');
-    el.classList.remove('is-visible');
-    el.style.opacity = '';
-    el.style.transition = '';
-  }, 950);
-}
-
-
-/* ════════════════════════════════════════════════════════════
-   5. SCENE TRANSITION
-   ════════════════════════════════════════════════════════════ */
 function transitionToInvitation() {
-  const landingScene     = document.getElementById('scene-landing');
-  const invitationScene  = document.getElementById('scene-invitation');
+  const landing    = document.getElementById('scene-landing');
+  const invitation = document.getElementById('scene-invitation');
 
-  // Stop particles
-  if (typeof window.invitation._stopParticles === 'function') {
-    window.invitation._stopParticles();
-  }
-
-  // Fade landing out
-  landingScene.style.transition = 'opacity 1s ease';
-  landingScene.style.opacity    = '0';
+  landing.style.transition    = 'opacity 1.1s ease';
+  landing.style.opacity       = '0';
+  landing.style.pointerEvents = 'none';
 
   setTimeout(() => {
-    // Take landing off screen
-    landingScene.classList.remove('scene--active');
-    landingScene.style.display = 'none';
-
-    // Allow body to scroll for invitation
-    document.body.style.overflow = '';
-
-    // Prepare invitation scene
-    invitationScene.style.opacity = '0';
-    invitationScene.classList.add('scene--active');
-    invitationScene.scrollTop = 0;
-
-    // Fade in invitation
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        invitationScene.style.transition = 'opacity 1.2s ease';
-        invitationScene.style.opacity    = '1';
-      });
-    });
-
-    // Trigger scroll-reveal for elements already in view
-    setTimeout(triggerRevealAll, 200);
-
-  }, 1050);
+    landing.classList.remove('scene--active');
+    invitation.classList.add('scene--active');
+    document.body.style.overflow = 'auto';
+    killParticles();
+    setTimeout(fireConfetti, CONFIG.confettiDelay);
+    initScrollReveal();
+    initCountdown();
+    initParallax();
+    initGallery();
+    applyGuestPersonalization();
+  }, 1100);
 }
 
 
-/* ════════════════════════════════════════════════════════════
-   6. SCROLL-REVEAL
-   ════════════════════════════════════════════════════════════ */
-let _revealObserver = null;
+/* ──────────────────────────────────────────────────────────────
+   COUNTDOWN
+   ────────────────────────────────────────────────────────────── */
+function initCountdown() {
+  const el = document.getElementById('countdown');
+  if (!el) return;
+  el.style.display = 'block';
+  tick();
+  setInterval(tick, 1000);
 
+  function tick() {
+    const diff = CONFIG.eventDate - Date.now();
+    if (diff <= 0) {
+      ['cd-days','cd-hours','cd-mins'].forEach(id => { const e = document.getElementById(id); if(e) e.textContent = '0'; });
+      return;
+    }
+    const days  = Math.floor(diff / 864e5);
+    const hours = Math.floor((diff % 864e5) / 36e5);
+    const mins  = Math.floor((diff % 36e5)  / 6e4);
+    document.getElementById('cd-days').textContent  = days;
+    document.getElementById('cd-hours').textContent = hours;
+    document.getElementById('cd-mins').textContent  = String(mins).padStart(2,'0');
+  }
+}
+
+
+/* ──────────────────────────────────────────────────────────────
+   PARALLAX
+   ────────────────────────────────────────────────────────────── */
+function initParallax() {
+  const portrait = document.querySelector('.portrait');
+  if (!portrait || window.matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+  portrait.classList.add('parallax-active');
+  const scene = document.getElementById('scene-invitation');
+  scene.addEventListener('scroll', () => {
+    portrait.style.transform = `translateY(${scene.scrollTop * .12}px)`;
+  }, { passive: true });
+}
+
+
+/* ──────────────────────────────────────────────────────────────
+   SCROLL REVEAL
+   ────────────────────────────────────────────────────────────── */
 function initScrollReveal() {
-  if (!('IntersectionObserver' in window)) {
-    // Fallback: just show everything
-    document.querySelectorAll('.reveal').forEach(el => el.classList.add('is-visible'));
-    return;
-  }
-
-  _revealObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry, i) => {
-        if (entry.isIntersecting) {
-          // Stagger siblings slightly
-          entry.target.style.transitionDelay = `${i * 60}ms`;
-          entry.target.classList.add('is-visible');
-          _revealObserver.unobserve(entry.target);
-        }
-      });
-    },
-    { threshold: 0.08, rootMargin: '0px 0px -30px 0px' }
-  );
-
-  document.querySelectorAll('.reveal').forEach(el => _revealObserver.observe(el));
-}
-
-function triggerRevealAll() {
-  // Re-check which elements are in view after scene switch
-  document.querySelectorAll('.reveal:not(.is-visible)').forEach((el, i) => {
-    const rect = el.getBoundingClientRect();
-    if (rect.top < window.innerHeight + 60) {
-      setTimeout(() => el.classList.add('is-visible'), i * 80);
-    }
-  });
-}
-
-
-/* ════════════════════════════════════════════════════════════
-   7. ADD TO CALENDAR (ICS)
-   Generates a .ics file in-browser and triggers download.
-   Works on iOS (opens in Calendar), Android, and desktop.
-   ════════════════════════════════════════════════════════════ */
-function addToCalendar() {
-  const { event } = CONFIG;
-
-  const ics = buildICS({
-    title:    event.title,
-    start:    event.startLocal,
-    end:      event.endLocal,
-    tz:       event.timezone,
-    location: event.location,
-    desc:     event.description,
-  });
-
-  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-  const url  = URL.createObjectURL(blob);
-
-  const a = document.createElement('a');
-  a.href     = url;
-  a.download = 'gails-65th-birthday.ics';
-  a.style.display = 'none';
-  document.body.appendChild(a);
-  a.click();
-
-  setTimeout(() => {
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }, 150);
-}
-
-function buildICS({ title, start, end, tz, location, desc }) {
-  const uid  = `gails-bday-2026-${Date.now()}@invitation.local`;
-  const stamp = utcStamp();
-
-  // ICS line folding: lines > 75 chars must be wrapped
-  const fold = (str) => {
-    const max = 75;
-    if (str.length <= max) return str;
-    let out = '';
-    let i = 0;
-    while (i < str.length) {
-      if (i === 0) { out += str.slice(0, max); i = max; }
-      else         { out += '\r\n ' + str.slice(i, i + max - 1); i += max - 1; }
-    }
-    return out;
-  };
-
-  const lines = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//Gail 65th Birthday//Invitation//EN',
-    'CALSCALE:GREGORIAN',
-    'METHOD:PUBLISH',
-    'BEGIN:VEVENT',
-    `UID:${uid}`,
-    `DTSTAMP:${stamp}`,
-    `DTSTART;TZID=${tz}:${start}`,
-    `DTEND;TZID=${tz}:${end}`,
-    fold(`SUMMARY:${icsEsc(title)}`),
-    fold(`LOCATION:${icsEsc(location)}`),
-    fold(`DESCRIPTION:${icsEsc(desc)}`),
-    'STATUS:CONFIRMED',
-    'SEQUENCE:0',
-    'TRANSP:OPAQUE',
-    // 1-hour reminder alarm
-    'BEGIN:VALARM',
-    'ACTION:DISPLAY',
-    'TRIGGER:-PT1H',
-    `DESCRIPTION:Reminder — ${icsEsc(title)}`,
-    'END:VALARM',
-    'END:VEVENT',
-    'END:VCALENDAR',
-  ];
-
-  return lines.join('\r\n');
-}
-
-function icsEsc(str) {
-  return String(str)
-    .replace(/\\/g, '\\\\')
-    .replace(/;/g, '\\;')
-    .replace(/,/g, '\\,')
-    .replace(/\r?\n/g, '\\n');
-}
-
-function utcStamp() {
-  return new Date()
-    .toISOString()
-    .replace(/[-:.]/g, '')
-    .slice(0, 15) + 'Z';
-}
-
-
-/* ════════════════════════════════════════════════════════════
-   8. GUEST PERSONALIZATION
-   Pass ?guest=FirstName+LastName in the URL to auto-fill
-   the envelope address for each recipient.
-   e.g. invitation.html?guest=Sarah+Smith
-   ════════════════════════════════════════════════════════════ */
-function applyGuestName() {
-  const params = new URLSearchParams(window.location.search);
-  const raw    = params.get('guest') || params.get('name') || '';
-  const name   = raw.trim()
-    ? decodeURIComponent(raw.trim())
-    : CONFIG.defaultGuestName;
-
-  const el = document.getElementById('guestName');
-  if (el) el.textContent = name;
-}
-
-
-/* ════════════════════════════════════════════════════════════
-   9. FUTURE EXPANSION STUBS
-   These are commented-out shells. Uncomment and implement
-   when you're ready to add each feature.
-   ════════════════════════════════════════════════════════════ */
-
-/*
-── RSVP FORM ───────────────────────────────────────────────
-  function initRSVPForm(formSelector, endpoint) {
-    // Wire up a <form> to Formspree / Netlify Forms / custom endpoint
-    // Fields: name, attending (yes/no), dietaryNeeds, message
-    const form = document.querySelector(formSelector);
-    if (!form) return;
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(form));
-      await fetch(endpoint, { method: 'POST', body: JSON.stringify(data),
-                              headers: { 'Content-Type': 'application/json' } });
-      // Show confirmation message
+  const targets = document.querySelectorAll('.reveal');
+  if (!targets.length) return;
+  const root = document.getElementById('scene-invitation');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); }
     });
-  }
-*/
+  }, { root, rootMargin:'0px 0px -40px 0px', threshold:.12 });
+  targets.forEach(t => io.observe(t));
+}
 
-/*
-── COUNTDOWN TIMER ─────────────────────────────────────────
-  function initCountdown(selector, targetDate) {
-    const el = document.querySelector(selector);
-    if (!el) return;
-    const tick = () => {
-      const diff = targetDate - Date.now();
-      if (diff <= 0) { el.textContent = "It's time to celebrate!"; return; }
-      const d = Math.floor(diff / 86400000);
-      const h = Math.floor((diff % 86400000) / 3600000);
-      const m = Math.floor((diff % 3600000) / 60000);
-      el.textContent = `${d}d ${h}h ${m}m`;
+
+/* ──────────────────────────────────────────────────────────────
+   GALLERY
+   ────────────────────────────────────────────────────────────── */
+function initGallery() {
+  const section = document.getElementById('gallery');
+  const grid    = document.getElementById('galleryGrid');
+  const lb      = document.getElementById('galleryLightbox');
+  const lbImg   = document.getElementById('galleryLbImg');
+  const lbClose = document.getElementById('galleryLbClose');
+  if (!section || !grid) return;
+
+  CONFIG.galleryPhotos.forEach((src, i) => {
+    const img = new Image();
+    img.onload = () => {
+      section.removeAttribute('hidden');
+      const item = document.createElement('div');
+      item.className = 'gallery-item reveal';
+      const el = document.createElement('img');
+      el.src = src; el.alt = `A memory with Gail`;
+      el.loading = 'lazy';
+      item.appendChild(el);
+      item.addEventListener('click', () => openLb(src));
+      grid.appendChild(item);
+
+      const root = document.getElementById('scene-invitation');
+      const io = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); } });
+      }, { root, threshold:.1 });
+      io.observe(item);
     };
-    tick();
-    setInterval(tick, 60000);
+    img.src = src;
+  });
+
+  function openLb(src) {
+    if (!lb || !lbImg) return;
+    lbImg.src = src;
+    lb.classList.add('is-open');
+    document.addEventListener('keydown', escLb);
   }
-  // Usage: initCountdown('#countdown', new Date('2026-08-13T17:00:00-06:00'));
-*/
-
-/*
-── PHOTO GALLERY ────────────────────────────────────────────
-  function initGallery(selector, photos) {
-    // Lazy-load a lightbox gallery of photos
-    // photos = [{ src, thumb, caption }]
+  function closeLb() {
+    if (!lb) return;
+    lb.classList.remove('is-open');
+    document.removeEventListener('keydown', escLb);
   }
-*/
+  function escLb(e) { if (e.key === 'Escape') closeLb(); }
 
-/*
-── MUSIC TOGGLE ─────────────────────────────────────────────
-  function initMusicToggle(audioSrc) {
-    const audio = new Audio(audioSrc);
-    audio.loop = true;
-    const btn = document.getElementById('music-toggle');
-    if (!btn) return;
-    btn.addEventListener('click', () => {
-      audio.paused ? audio.play() : audio.pause();
-      btn.textContent = audio.paused ? '♪ Play Music' : '■ Pause Music';
-    });
-  }
-*/
-
-/*
-── CONFETTI ─────────────────────────────────────────────────
-  function launchConfetti() {
-    // Integrate canvas-confetti (npm: canvas-confetti)
-    // import confetti from 'https://cdn.jsdelivr.net/npm/canvas-confetti@1/dist/confetti.browser.min.js'
-    // confetti({ particleCount: 120, spread: 70, colors: ['#c9a84c','#faf6ef','#e8d5a3'] });
-  }
-*/
-
-/*
-── ANALYTICS ────────────────────────────────────────────────
-  function initAnalytics(gaId) {
-    const s = document.createElement('script');
-    s.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
-    s.async = true;
-    document.head.appendChild(s);
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
-    gtag('config', gaId);
-  }
-*/
-
-
-/* ════════════════════════════════════════════════════════════
-   UTILITY
-   ════════════════════════════════════════════════════════════ */
-function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  if (lb) lb.addEventListener('click', e => { if (e.target === lb) closeLb(); });
+  if (lbClose) lbClose.addEventListener('click', closeLb);
+  window.invitation = window.invitation || {};
+  window.invitation.closeLightbox = closeLb;
 }
+
+
+/* ──────────────────────────────────────────────────────────────
+   GUEST PERSONALIZATION  (?guest=Name&message=Text)
+   ────────────────────────────────────────────────────────────── */
+function applyGuestPersonalization() {
+  const params  = new URLSearchParams(window.location.search);
+  const guest   = params.get('guest');
+  const message = params.get('message');
+
+  if (guest) {
+    const eyebrow = document.querySelector('.inv__eyebrow');
+    if (eyebrow) eyebrow.textContent = `An Invitation for ${decodeURIComponent(guest)}`;
+    const rsvpField = document.getElementById('rsvp-name');
+    if (rsvpField) rsvpField.value = decodeURIComponent(guest);
+  }
+
+  if (message) {
+    const msgEl = document.getElementById('personalMsg');
+    const txt   = document.getElementById('personalMsgText');
+    if (msgEl && txt) {
+      txt.textContent = decodeURIComponent(message);
+      msgEl.removeAttribute('hidden');
+    }
+  }
+}
+
+
+/* ──────────────────────────────────────────────────────────────
+   RSVP MODAL
+   ────────────────────────────────────────────────────────────── */
+function initRSVP() {
+  const form = document.getElementById('rsvpForm');
+  if (form) form.addEventListener('submit', handleRSVPSubmit);
+}
+
+function openRSVP() {
+  const modal = document.getElementById('rsvpModal');
+  if (!modal) return;
+  modal.classList.add('is-open');
+  modal.setAttribute('aria-hidden','false');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => { const f = document.getElementById('rsvp-name'); if (f) f.focus(); }, 100);
+  document.addEventListener('keydown', rsvpEsc);
+}
+
+function closeRSVP() {
+  const modal = document.getElementById('rsvpModal');
+  if (!modal) return;
+  modal.classList.remove('is-open');
+  modal.setAttribute('aria-hidden','true');
+  document.body.style.overflow = '';
+  document.removeEventListener('keydown', rsvpEsc);
+}
+
+function rsvpEsc(e) { if (e.key === 'Escape') closeRSVP(); }
+
+function selectAttending(btn) {
+  document.querySelectorAll('.rsvp-attending__btn').forEach(b => b.classList.remove('is-selected'));
+  btn.classList.add('is-selected');
+  document.getElementById('rsvp-attending').value = btn.dataset.val;
+}
+
+function handleRSVPSubmit(e) {
+  e.preventDefault();
+  const name     = document.getElementById('rsvp-name')?.value.trim()    || '';
+  const attending= document.getElementById('rsvp-attending')?.value       || '';
+  const guests   = document.getElementById('rsvp-guests')?.value          || '1';
+  const msg      = document.getElementById('rsvp-msg')?.value.trim()      || '';
+
+  if (!name) { alert('Please enter your name.'); return; }
+
+  const body = [
+    `Name: ${name}`,
+    `Attending: ${attending || 'Not specified'}`,
+    `Number of guests: ${guests}`,
+    msg ? `Message: ${msg}` : '',
+  ].filter(Boolean).join('\n');
+
+  window.location.href = `mailto:?body=${encodeURIComponent(body)}&subject=${encodeURIComponent("RSVP – Gail's 65th Birthday")}`;
+
+  const card = document.querySelector('.rsvp-modal__card');
+  if (card) {
+    card.innerHTML = `
+      <div style="text-align:center;padding:2rem 1rem">
+        <p style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-style:italic;color:#221c16;margin-bottom:.5rem">
+          ${attending === 'No' ? 'We'll miss you!' : 'We can't wait to celebrate!'}
+        </p>
+        <p style="font-family:'Lato',sans-serif;font-size:.82rem;letter-spacing:.1em;color:#7a6a58;margin-bottom:1.5rem">
+          ${attending === 'No' ? 'Thank you for letting us know.' : 'See you on August 13th.'}
+        </p>
+        <button onclick="window.invitation.closeRSVP()" style="padding:.75rem 2rem;background:#8a6620;color:#faf6ef;border:none;border-radius:2px;font-family:'Lato',sans-serif;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer">Close</button>
+      </div>`;
+  }
+}
+
+
+/* ──────────────────────────────────────────────────────────────
+   ADD TO CALENDAR (ICS)
+   ────────────────────────────────────────────────────────────── */
+function addToCalendar() {
+  const pad = n => String(n).padStart(2,'0');
+  const fmt = d => `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+  const start = new Date('2025-08-13T17:00:00');
+  const end   = new Date('2025-08-14T00:00:01');
+  const ics = [
+    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Gails65th//EN',
+    'BEGIN:VEVENT',
+    `DTSTART:${fmt(start)}`,`DTEND:${fmt(end)}`,
+    `SUMMARY:Gail's 65th Birthday Celebration`,
+    'DESCRIPTION:Dinner at Villagio Condos\\, then dancing at Vic Lam Cavern at Clavet Motor Inn.',
+    'LOCATION:103A–310 Wellman Crescent\\, Villagio Condos',
+    'END:VEVENT','END:VCALENDAR',
+  ].join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([ics],{type:'text/calendar'}));
+  a.download = 'gails-65th.ics';
+  a.click(); URL.revokeObjectURL(a.href);
+}
+
+
+/* ──────────────────────────────────────────────────────────────
+   UTILITY
+   ────────────────────────────────────────────────────────────── */
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+
+/* ──────────────────────────────────────────────────────────────
+   PUBLIC API
+   ────────────────────────────────────────────────────────────── */
+window.invitation = {
+  openRSVP,
+  closeRSVP,
+  selectAttending,
+  addToCalendar,
+};
+
+
+/* ──────────────────────────────────────────────────────────────
+   INIT
+   ────────────────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  const landing = document.getElementById('scene-landing');
+  if (landing) landing.classList.add('scene--active');
+  initParticles();
+  initEnvelope();
+  initMusic();
+  initRSVP();
+});
